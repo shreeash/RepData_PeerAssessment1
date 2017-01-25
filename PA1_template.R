@@ -1,99 +1,100 @@
----
-title:   "Reproducible Research : Peer Assessment 1"
-output:  md_document
----
-##Loading and Processing data to find out the mean total number of steps taken per day
-```{r, echo=TRUE}
+#Data loading 
 fileUrl <- "https://d396qusza40orc.cloudfront.net/repdata%2Fdata%2Factivity.zip"
 download.file(fileUrl, destfile = "data.zip")
 fitdata <- unzip("data.zip")
 fit <- read.csv(fitdata, header = T, na.strings = "NA")
 fit$date <- as.Date(fit$date)
 fit$steps <- as.numeric(as.character(fit$steps))
-```
-Histogram of total number of steps each day 
-```{r, echo = TRUE}
+
+#Unique day will occupy only one row and the corresponding step values will be added up
 library(dplyr)
 fit <- fit %>% group_by(date) %>% summarise(steps = sum(steps))
+
+#Plot total number of steps taken each day
 SD.png <- barplot(fit$steps, names.arg = fit$date, main = "Total no. of Steps per Day", xlab = "Days", ylab = "Steps", col="red")
-```
+dev.copy(png, file = "SD.png", height = 480, width = 480)
+dev.off()
 
-
-Mean and Median of total number of steps taken per day
-```{r, echo = TRUE}
+#mean and median of number of steps taken each day
 mean(fit$steps, na.rm = T)
 median(fit$steps, na.rm = T)
-```
-##What is the average daily activity pattern?
-Plot of the 5-minute interval (x-axis) and the average number of steps taken, averaged across all days (y-axis)
-```{r, echo=TRUE}
+
+#Reload original data
 fit <- read.csv(fitdata, header = T, na.strings = "NA")
 fit$date <- as.Date(fit$date)
 fit$steps <- as.numeric(as.character(fit$steps))
 fit$interval <- as.numeric(as.character(fit$interval))
+
+#Unique interval number will occupy only one row and the corresponding steps value will be added up across all days
 fit <- na.omit(fit)
 library(dplyr)
 fit <- fit %>% group_by(interval) %>% summarise(steps = mean(steps))
+
+#Generate the line plot of the 5-minute interval (x-axis) and the average number of steps taken, averaged across all days (y-axis)
 TS.png <- plot(fit$interval, fit$steps, type = 'l', col = "blue", main="Average number of steps taken across all days", xlab="Interval", 
      ylab="Average number of steps taken")
-```
+dev.copy(png, file = "TS.png", height = 480, width = 480)
+dev.off()
 
+# The 5-minute interval, on average across all the days in the dataset, that contains the maximum number of steps
+fit[which.max(fit$steps), ]
 
-The 5-minute interval on average across all the days in the dataset, that contains the maximum number of steps
-```{r, echo=TRUE}
-fit[which.max(fit$steps),1]
-```
-##Imputing missing values
-Total number of missing values in the dataset and in each column
-```{r, echo=TRUE}
+#Reload original data
 fit <- read.csv(fitdata, header = T, na.strings = "NA")
 fit$date <- as.Date(fit$date)
 fit$steps <- as.numeric(as.character(fit$steps))
 fit$interval <- as.numeric(as.character(fit$interval))
+
+#Number of missing values in the dataset
 sum(is.na(fit))
+
+#Number of missing values in each column
 sum(is.na(fit$steps))
 sum(is.na(fit$date))
 sum(is.na(fit$interval))
-```
-Strategy to impute missing values for steps with the mean at each interval across all days and create a new dataset
-```{r, echo=TRUE}
+
+
+#Imputing missing values for steps with mean by intervals
 impute.mean <- function(x) replace(x, is.na(x), mean(x, na.rm = TRUE))
+
+#Create a new dataset that is equal to the original dataset but with the missing data filled in
 fitimp <- fit %>%  group_by(interval) %>% mutate(steps = impute.mean(steps))
-```
-Histogram of the total number of steps taken each day (after imputing)
-```{r, echo=TRUE}
+
+#Plot total number of steps taken each day after imputing
 library(dplyr)
 fitimp <- fitimp %>% group_by(date) %>% summarise(steps = sum(steps))
+
+#histogram of the total number of steps taken each day after imputing
 SDimp.png <- barplot(fitimp$steps, names.arg = fitimp$date, main = "Total no. of Steps per Day(imp)", xlab = "Days", ylab = "Steps", col="red")
-```
+dev.copy(png, file = "SDimp.png", height = 480, width = 480)
+dev.off()
 
-
-Mean and Median of total number of steps taken per day (after imputing)
-```{r, echo=TRUE}
+#mean and median of number of steps taken each day after imputing
 mean(fitimp$steps, na.rm = T)
 median(fitimp$steps, na.rm = T)
-```
-##Are there differences in activity patterns between weekdays and weekends?
-Create a factor variable in the dataset to indicate the weekday corresponding to the dates
-```{r, echo=TRUE}
+
+#Reload original data
 fit <- read.csv(fitdata, header = T, na.strings = "NA")
 fit$date <- as.Date(fit$date)
 fit$steps <- as.numeric(as.character(fit$steps))
 fit$interval <- as.numeric(as.character(fit$interval))
+
+#Create a factor variable to indicate the weekday for the dates
 fit$day <- weekdays(as.Date(fit$date))
-```
-Plot containing a time series plot of the 5-minute interval (x-axis) and the average number of steps taken, averaged across all weekday days or weekend days (y-axis)
-```{r, fig.width = 16, fig.height = 8, echo=TRUE}
 fitweekday <- fit[!fit$day == c("Saturday", "Sunday"),]
 fitweekend <- fit[fit$day == c("Saturday", "Sunday"),]
+
 fitweekday <- na.omit(fitweekday)
 fitweekend <- na.omit(fitweekend)
 library(dplyr)
 fitweekday <- fitweekday %>% group_by(interval) %>% summarise(steps = mean(steps))
 fitweekend <- fitweekend %>% group_by(interval) %>% summarise(steps = mean(steps))
+
+#Plot timeseries to compare activty between weekday and weekend
 par(mfrow = c(1,2))
 plot(fitweekday$interval, fitweekday$steps, type = 'l', col = "green", main="Average number of steps taken across all Weekdays", xlab="Interval", 
      ylab="Avg number of steps taken during Weekdays")
 plot(fitweekend$interval, fitweekend$steps, type = 'l', col = "red", main="Average number of steps taken across all Weekends", xlab="Interval", 
      ylab="Average number of steps taken during Weekends")
-```
+dev.copy(png, file = "TSweekdayvsweekend.png", height = 480, width = 960)
+dev.off()
