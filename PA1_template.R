@@ -11,9 +11,7 @@ library(dplyr)
 fit <- fit %>% group_by(date) %>% summarise(steps = sum(steps))
 
 #Plot total number of steps taken each day
-SD.png <- barplot(fit$steps, names.arg = fit$date, main = "Total no. of Steps per Day", xlab = "Days", ylab = "Steps", col="red")
-dev.copy(png, file = "SD.png", height = 480, width = 480)
-dev.off()
+barplot(fit$steps, names.arg = fit$date, main = "Total no. of Steps per Day", xlab = "Days", ylab = "Steps", col="red")
 
 #mean and median of number of steps taken each day
 mean(fit$steps, na.rm = T)
@@ -31,10 +29,9 @@ library(dplyr)
 fit <- fit %>% group_by(interval) %>% summarise(steps = mean(steps))
 
 #Generate the line plot of the 5-minute interval (x-axis) and the average number of steps taken, averaged across all days (y-axis)
-TS.png <- plot(fit$interval, fit$steps, type = 'l', col = "blue", main="Average number of steps taken across all days", xlab="Interval", 
+plot(fit$interval, fit$steps, type = 'l', col = "blue", main="Average number of steps taken across all days", xlab="Interval", 
      ylab="Average number of steps taken")
-dev.copy(png, file = "TS.png", height = 480, width = 480)
-dev.off()
+
 
 # The 5-minute interval, on average across all the days in the dataset, that contains the maximum number of steps
 fit[which.max(fit$steps), ]
@@ -65,9 +62,7 @@ library(dplyr)
 fitimp <- fitimp %>% group_by(date) %>% summarise(steps = sum(steps))
 
 #histogram of the total number of steps taken each day after imputing
-SDimp.png <- barplot(fitimp$steps, names.arg = fitimp$date, main = "Total no. of Steps per Day(imp)", xlab = "Days", ylab = "Steps", col="red")
-dev.copy(png, file = "SDimp.png", height = 480, width = 480)
-dev.off()
+barplot(fitimp$steps, names.arg = fitimp$date, main = "Total no. of Steps per Day(imp)", xlab = "Days", ylab = "Steps", col="red")
 
 #mean and median of number of steps taken each day after imputing
 mean(fitimp$steps, na.rm = T)
@@ -96,5 +91,3 @@ plot(fitweekday$interval, fitweekday$steps, type = 'l', col = "green", main="Ave
      ylab="Avg number of steps taken during Weekdays")
 plot(fitweekend$interval, fitweekend$steps, type = 'l', col = "red", main="Average number of steps taken across all Weekends", xlab="Interval", 
      ylab="Average number of steps taken during Weekends")
-dev.copy(png, file = "TSweekdayvsweekend.png", height = 480, width = 960)
-dev.off()
